@@ -1,5 +1,5 @@
 // import { DB } from "https://deno.land/x/sqlite/mod.ts";
-import { join } from "https://deno.land/std@0.163.0/path/mod.ts";
+import { join } from "https://deno.land/std@0.165.0/path/mod.ts";
 import { init } from "./setup.ts";
 import { config, initConfig } from "./config.ts";
 import { addCard, getAll, getCard, getIDFromList, update } from "./api.ts";
@@ -35,7 +35,7 @@ if (import.meta.main) {
     rarity: 'SR'
   }
 
-  const c = addCard(marnie);
+  addCard(marnie);
 
   console.log(getCard(1));
 
