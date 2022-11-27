@@ -1,12 +1,12 @@
 import { DB, SqliteError } from "https://deno.land/x/sqlite@v3.7.0/mod.ts";
 
-export function init (dbPath: string) {
+export function init(dbPath: string) {
   const db = new DB(dbPath);
 
   try {
     db.query<[number, number]>(`SELECT * FROM versions`);
     db.close();
-  } catch(_e) {
+  } catch (_e) {
     db.execute(`
       CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
