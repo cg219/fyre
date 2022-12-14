@@ -2,7 +2,7 @@ import { parse } from "https://deno.land/std@0.167.0/encoding/csv.ts";
 import { addCard, getAll, getIDFromList } from "../api.ts";
 import { Account, CardCondition, CardEdition, CardLanguage, CardSchema, GradingCompany } from "./../types.ts";
 
-export async function importCSV(url: URL, account?: Account) {
+export async function importCards(url: URL, account?: Account) {
     const response = await fetch(url);
     const csv = await response.text();
     const data = parse(csv, {
@@ -49,5 +49,5 @@ export async function importCSV(url: URL, account?: Account) {
 }
 
 export default {
-    importCSV
+    importCards
 }

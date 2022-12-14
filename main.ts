@@ -13,13 +13,13 @@ import {
   GradingCompany,
   MetadataType,
 } from "./types.ts";
-import { importCSV } from "./utils/import.ts";
+import { importCards } from "./utils/import.ts";
 
 if (import.meta.main) {
   initConfig(join("data", "database.db"));
   init(config().DB_PATH);
 
-  await importCSV(new URL(toFileUrl(resolve(join("imported", "pokemon.csv")))))
+  await importCards(new URL(toFileUrl(resolve(join("imported", "pokemon.csv")))))
 
   // console.log(getCard(1));
 
