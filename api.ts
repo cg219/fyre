@@ -247,7 +247,7 @@ export function addStock(asset: StockSchema) {
   const db = new DB(config().DB_PATH);
   const metadataSql =
     `INSERT INTO stock_metadata (asset_id, ticker, sector, dividend_payout, dividend_frequency)
-        VALUES (:asset_id, :ticker, :sector, :dividend_payout, :dividend_frequency;`;
+        VALUES (:asset_id, :ticker, :sector, :dividend_payout, :dividend_frequency);`;
   const { ticker, sector, dividend_payout, dividend_frequency } = asset;
   const [asset_id] = addAsset(asset, db);
 

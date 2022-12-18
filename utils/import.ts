@@ -1,6 +1,6 @@
 import { parse } from "https://deno.land/std@0.167.0/encoding/csv.ts";
-import { addCard, getAll, getIDFromList } from "../api.ts";
-import { Account, CardCondition, CardEdition, CardLanguage, CardSchema, GradingCompany } from "./../types.ts";
+import { addCard, addStock, getAll, getIDFromList } from "../api.ts";
+import { Account, CardCondition, CardEdition, CardLanguage, CardSchema, GradingCompany, StockSchema } from "./../types.ts";
 
 export async function importCards(url: URL, account?: Account) {
     const response = await fetch(url);
@@ -20,7 +20,6 @@ export async function importCards(url: URL, account?: Account) {
     const companies: GradingCompany[] = getAll("grading_companies");
 
     data.forEach((row) => {
-        // const card
         const card: CardSchema = {
             name: row.name as string,
             price: row.price as number,
@@ -44,10 +43,41 @@ export async function importCards(url: URL, account?: Account) {
 
         addCard(card);
     })
+}
 
-    // console.log(data, account);
+export async function importStocks(url: URL, account?: Account) {
+    const response = await fetch(url);
+    const csv = await response.text();
+    const data = parse(csv, {
+        skipFirstRow: true,
+        columns: [
+            'name', 'price', 'cost', 'amount', 'owned', 'sold', 'sold_price',
+            'liquid', 'spendable', 'ticker', 'sector', 'dividend_payout', 'dividend_frequency'
+        ]
+    });
+
+    data.forEach((row) => {
+        const stock: StockSchema = {
+            name: row.name as string,
+            price: row.price as number,
+            cost: row.cost as number,
+            amount: row.amount as number,
+            owned: row.owned as boolean,
+            sold: row.sold as boolean,
+            sold_price: row.sold_price as number,
+            liquid: row.liquid as boolean,
+            spendable: row.spendable as boolean,
+            ticker: row.ticker as string,
+            sector: row.sector as string,
+            dividend_payout: row.dividend_payout as number || 0,
+            dividend_frequency: row.dividend_frequency as number || 0
+        }
+
+        addStock(stock);
+    })
 }
 
 export default {
-    importCards
+    importCards,
+    importStocks
 }
