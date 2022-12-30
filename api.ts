@@ -1,7 +1,10 @@
 import { DB } from "https://deno.land/x/sqlite@v3.7.0/mod.ts";
 import { config } from "./config.ts";
 import {
+Account,
+AccountSchema,
   Asset,
+  AssetList,
   AssetSchema,
   Card,
   CardSchema,
@@ -28,10 +31,11 @@ function addAsset(asset: AssetSchema, db: DB): [number, AssetSchema[]] {
     liquid,
     spendable,
     account_id,
+    type
   } = asset;
   const sql =
-    `INSERT INTO assets (name, amount, price, cost, owned, sold, sold_price, liquid, spendable, account_id)
-        VALUES (:name, :amount, :price, :cost, :owned, :sold, :sold_price, :liquid, :spendable, :account_id)
+    `INSERT INTO assets (name, amount, price, cost, owned, sold, sold_price, liquid, spendable, account_id, type)
+        VALUES (:name, :amount, :price, :cost, :owned, :sold, :sold_price, :liquid, :spendable, :account_id, :type)
         RETURNING *;`;
   const results = db.queryEntries<{
     id: number;
@@ -45,6 +49,7 @@ function addAsset(asset: AssetSchema, db: DB): [number, AssetSchema[]] {
     liquid: boolean;
     spendable: boolean;
     account_id?: number;
+    type: string;
   }>(sql, {
     name,
     amount,
@@ -56,6 +61,7 @@ function addAsset(asset: AssetSchema, db: DB): [number, AssetSchema[]] {
     liquid,
     spendable,
     account_id,
+    type
   });
 
   return [results[0].id, results];
@@ -198,6 +204,24 @@ export function getCash(id: number): Cash {
   return { ...asset, ...metadata, id };
 }
 
+export function getAccountData(account_id: number): AssetList {
+  const db = new DB(config().DB_PATH);
+  const sql = `SELECT * FROM assets WHERE account_id = :account_id;`;
+  const results = db.queryEntries<Asset>(sql, { account_id });
+  const assets = results.map((asset) => {
+    if (asset.type == MetadataType.CARD) return getCard(asset.id);
+    if (asset.type == MetadataType.CASH) return getCash(asset.id);
+    if (asset.type == MetadataType.STOCK) return getStock(asset.id);
+    return getCrypto(asset.id);
+  });
+
+  return {
+    accountId: 1,
+    accountName: 'test',
+    assets: [...assets]
+  }
+}
+
 export function getIDFromList(
   name: string,
   list: ListSchemaMap[],
@@ -243,22 +267,18 @@ export function addCard(asset: CardSchema) {
   db.close();
 }
 
-export function addStock(asset: StockSchema) {
+export function addAccount(asset: AccountSchema) {
   const db = new DB(config().DB_PATH);
-  const metadataSql =
-    `INSERT INTO stock_metadata (asset_id, ticker, sector, dividend_payout, dividend_frequency)
-        VALUES (:asset_id, :ticker, :sector, :dividend_payout, :dividend_frequency);`;
-  const { ticker, sector, dividend_payout, dividend_frequency } = asset;
-  const [asset_id] = addAsset(asset, db);
+  const sql =
+    `INSERT INTO accounts (name, types)
+        VALUES (:name, :types)
+        RETURNING *;`;
+  const { name, types } = asset;
+  const results = db.queryEntries<{ id: number, name: string }>(sql, { name, types });
 
-  db.queryEntries(metadataSql, {
-    ticker,
-    sector,
-    dividend_payout,
-    dividend_frequency,
-    asset_id,
-  });
   db.close();
+
+  return [results[0], results];
 }
 
 export function addCrypto(asset: CryptoSchema) {
@@ -284,6 +304,24 @@ export function addCash(asset: CashSchema) {
   db.close();
 }
 
+export function addStock(asset: StockSchema) {
+  const db = new DB(config().DB_PATH);
+  const metadataSql =
+    `INSERT INTO stock_metadata (asset_id, ticker, sector, dividend_payout, dividend_frequency)
+        VALUES (:asset_id, :ticker, :sector, :dividend_payout, :dividend_frequency);`;
+  const { ticker, sector, dividend_payout, dividend_frequency } = asset;
+  const [asset_id] = addAsset(asset, db);
+
+  db.queryEntries(metadataSql, {
+    ticker,
+    sector,
+    dividend_payout,
+    dividend_frequency,
+    asset_id,
+  });
+  db.close();
+}
+
 export function getAll<T>(table: string): T[] {
   const db = new DB(config().DB_PATH);
   const sql = `SELECT * FROM ${table};`;
@@ -298,12 +336,14 @@ export default {
   addStock,
   addCrypto,
   addCash,
+  addAccount,
   getAll,
   getCard,
   getCash,
   getStock,
   getCrypto,
   getIDFromList,
+  getAccountData,
   update,
   remove
 };

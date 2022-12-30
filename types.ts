@@ -17,6 +17,7 @@ export type AssetSchema = {
   liquid: boolean;
   spendable: boolean;
   account_id?: number;
+  type: string;
 };
 
 export type CardSchema = AssetSchema & {
@@ -101,7 +102,9 @@ export type SchemaType = {
 };
 
 export type ListSchemaMap = ListSchema & SchemaType;
-export type AccountSchema = ListSchema;
+export type AccountSchema = ListSchema & {
+  types: string;
+};
 export type CardConditionSchema = ListSchema;
 export type CardLanguageSchema = ListSchema;
 export type CardEditionSchema = ListSchema;
@@ -121,6 +124,13 @@ export type CardCondition = CardConditionSchema & SchemaType;
 export type CardLanguage = CardLanguageSchema & SchemaType;
 export type CardEdition = CardEditionSchema & SchemaType;
 export type CardSet = CardSetSchema & SchemaType;
+export type AssetList = {
+  accountName: string;
+  accountId: number;
+  userid?: number;
+  assets: AssetType[]
+}
+export type AssetType = Asset | Card | Stock | Crypto | Cash;
 
 export interface Config {
   DB_PATH: string;

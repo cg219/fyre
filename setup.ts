@@ -10,7 +10,8 @@ export function init(dbPath: string) {
     db.execute(`
       CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
+        name TEXT NOT NULL,
+        types TEXT NOT NULL
       );
 
       CREATE TABLE IF NOT EXISTS grading_companies (
@@ -51,6 +52,7 @@ export function init(dbPath: string) {
         account_id INTEGER,
         liquid INTEGER NOT NULL,
         spendable INTEGER NOT NULL,
+        type TEXT NOT NULL,
         FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE
       );
 

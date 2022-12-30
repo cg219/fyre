@@ -1,6 +1,6 @@
 import { parse } from "https://deno.land/std@0.167.0/encoding/csv.ts";
 import { addCard, addStock, getAll, getIDFromList } from "../api.ts";
-import { Account, CardCondition, CardEdition, CardLanguage, CardSchema, GradingCompany, StockSchema } from "./../types.ts";
+import { Account, CardCondition, CardEdition, CardLanguage, CardSchema, GradingCompany, MetadataType, StockSchema } from "./../types.ts";
 
 export async function importCards(url: URL, account?: Account) {
     const response = await fetch(url);
@@ -38,7 +38,9 @@ export async function importCards(url: URL, account?: Account) {
             error: row.error as boolean,
             graded: row.graded as boolean,
             grading_company: getIDFromList(row.grading_company as string, companies),
-            language: getIDFromList(row.language as string, languages)
+            language: getIDFromList(row.language as string, languages),
+            account_id: account!.id,
+            type: MetadataType.CARD
         }
 
         addCard(card);
@@ -70,7 +72,9 @@ export async function importStocks(url: URL, account?: Account) {
             ticker: row.ticker as string,
             sector: row.sector as string,
             dividend_payout: row.dividend_payout as number || 0,
-            dividend_frequency: row.dividend_frequency as number || 0
+            dividend_frequency: row.dividend_frequency as number || 0,
+            account_id: account!.id,
+            type: MetadataType.STOCK
         }
 
         addStock(stock);
