@@ -1,6 +1,15 @@
 {
   "tasks": {
-    "dev": "deno run --allow-read --allow-write main.ts",
-    "dev:n": "rm data/database.db && deno run --allow-read --allow-write main.ts",
+    "dev:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite",
+    "dev:server": "deno run --allow-read --allow-write -A server/main.ts",
+    "dev:app": "cargo tauri dev",
+    "build:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite build",
+    "preview:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite preview",
+    "serve:frontend": "cd frontend && deno run --allow-net --allow-read https://deno.land/std@0.157.0/http/file_server.ts dist/"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true
   }
 }

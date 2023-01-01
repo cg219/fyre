@@ -3,10 +3,10 @@ import { addAccount } from "./api.ts";
 import { Account, MetadataType } from "./types.ts";
 import { importCards, importStocks } from "./utils/import.ts";
 
-const pokemonURL = new URL(toFileUrl(resolve(join("imported", "pokemon.csv"))));
-const investingURL = new URL(toFileUrl(resolve(join("imported", "investing.csv"))));
-const rothURL = new URL(toFileUrl(resolve(join("imported", "roth.csv"))));
-const sepURL = new URL(toFileUrl(resolve(join("imported", "sep.csv"))));
+const pokemonURL = new URL(toFileUrl(resolve(join("..", "imported", "pokemon.csv"))));
+const investingURL = new URL(toFileUrl(resolve(join("..", "imported", "investing.csv"))));
+const rothURL = new URL(toFileUrl(resolve(join("..", "imported", "roth.csv"))));
+const sepURL = new URL(toFileUrl(resolve(join("..", "imported", "sep.csv"))));
 
 export default async function init() {
     const [cardAccount] = addAccount({ name: 'Card Collection', types: [MetadataType.CARD].join('|') });

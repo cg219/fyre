@@ -18,7 +18,7 @@ Account,
 import { importCards, importStocks } from "./utils/import.ts";
 
 if (import.meta.main) {
-  initConfig(join("data", "database.db"));
+  initConfig(join("..", "data", "database.db"));
   // init(config().DB_PATH);
   // await initialInit();
 
