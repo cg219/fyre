@@ -4,6 +4,7 @@ export enum MetadataType {
   CASH = "cash_metadata",
   STOCK = "stock_metadata",
   ASSET = "assets",
+  ACCOUNT = 'accounts'
 }
 
 export type AssetSchema = {
@@ -62,6 +63,10 @@ export interface CardUpdate extends Update {
   grading_company?: number;
   grade?: number;
   language?: number;
+}
+
+export interface AccountUpdate extends Update {
+  name?: string;
 }
 
 export type StockSchema = AssetSchema & {

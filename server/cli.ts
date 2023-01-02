@@ -1,9 +1,9 @@
 import { join, resolve } from "https://deno.land/std@0.170.0/path/mod.ts";
 import { Command, ValidationError } from "https://deno.land/x/cliffy@v0.25.6/command/mod.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.25.6/table/table.ts";
-import { addAccount, getAccountData, getAll } from "./api.ts";
+import { addAccount, getAccountData, getAll, remove, update } from "./api.ts";
 import { initConfig } from "./config.ts";
-import { Account, Asset, AssetList, Dictionary, MetadataType, SchemaType } from "./types.ts";
+import { Account, AccountUpdate, Asset, AssetList, Dictionary, MetadataType, SchemaType } from "./types.ts";
 
 function transformtoTable(data: SchemaType[] | AssetList) {
     const headers = Object.keys((data as SchemaType[]).at(0) as {}) as string[];
@@ -27,12 +27,27 @@ function accountAssets(id: number) {
 }
 
 function createAccount(name: string, types: string) {
-    if (!name) throw new ValidationError('account creation needs a name. --name');
+    if (!name) throw new ValidationError('account creation needs a --name');
     const data = addAccount({ name, types });
     return format(data);
 }
 
-function format(data: SchemaType[] | AssetList, formatType: string = 'cli') {
+function removeAccount(id: number) {
+    if (!id) throw new ValidationError('account removal needs a --id');
+
+    remove(id, 'accounts');
+    console.log(`account with id: ${id} removed`);
+}
+
+function updateAccount(id: number, name: string) {
+    if (!id) throw new ValidationError('account removal needs a --id');
+    if (!name) throw new ValidationError('account removal needs a name; ac');
+
+    update(id, { name } as AccountUpdate, 'accounts');
+    console.log(`account with id: ${id} updated name to ${name}`);
+}
+
+function format(data: SchemaType[] | AssetList, formatType = 'cli') {
     if (formatType == 'json') return data;
     if (formatType == 'cli') {
         const formatted = transformtoTable(data);
@@ -44,12 +59,14 @@ const accounts = new Command()
     .option('-i, --id <id:number>', 'account id')
     .option('-n, --name <name:string>', 'account name')
     .option('-t, --type <type:string>', 'account type; "cash", "stock", "crypto", "card"')
-    .arguments('<action:string>')
-    .usage('[options] [command]')
+    .arguments('<action:string> [data:string]')
+    .usage('[options] [method] [methodData]')
     .description('Accounts API')
-    .action(({ id, name, type }, method ) => {
+    .action(({ id, name, type }, method, newName ) => {
         if (method.toLowerCase() == 'list') return listAcounts();
         if (method.toLowerCase() == 'assets') return accountAssets(id!);
+        if (method.toLowerCase() == 'remove') return removeAccount(id!);
+        if (method.toLowerCase() == 'update') return updateAccount(id!, newName!);
         if (method.toLowerCase() == 'create') {
             let types;
 

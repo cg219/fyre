@@ -76,18 +76,23 @@ function updateData(
   where = "id",
 ) {
   const sets = columns
-    .map((col, index) => `${col}= ${values[index]}`)
+    .map((col, index) => {
+      const v: (string | number | boolean) = values[index];
+
+      return `${col} = ${typeof v == 'string' ? `'${v}'` : v}`
+    })
     .join(", ");
-  const sql = `UPDATE ${table}
-        SET ${sets}
-        WHERE ${where} = :id;`;
-  db.queryEntries(sql, { id });
+
+  db.queryEntries(`UPDATE ${table}
+    SET ${sets}
+    WHERE ${where} = :id;`, { id });
 }
 
 function createUpdate(
   id: number,
   db: DB,
   changes?: Update,
+  table = 'assets',
   type: MetadataType = MetadataType.ASSET,
 ) {
   if (!changes) return;
@@ -106,7 +111,7 @@ function createUpdate(
     updateData(
       id,
       db,
-      type,
+      table,
       columns,
       values,
       type == MetadataType.ASSET ? "id" : "asset_id",
@@ -116,16 +121,16 @@ function createUpdate(
   createUpdate(id, db, metadata, metadata_type);
 }
 
-export function update(id: number, changes: Update) {
+export function update(id: number, changes: Update, table: string) {
   const db = new DB(config().DB_PATH);
 
-  createUpdate(id, db, changes);
+  createUpdate(id, db, changes, table, changes.metadata_type);
   db.close();
 }
 
-export function remove(id: number) {
+export function remove(id: number, table = 'assets') {
   const db = new DB(config().DB_PATH);
-  const sql = `DELETE FROM assets
+  const sql = `DELETE FROM ${table}
         WHERE id = :id;`;
   db.queryEntries(sql, { id });
   db.close();
