@@ -135,3 +135,5 @@ export type AssetType = Asset | Card | Stock | Crypto | Cash;
 export interface Config {
   DB_PATH: string;
 }
+
+export type Dictionary = { [index:string]: any }

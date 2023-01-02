@@ -1,5 +1,5 @@
 // import { DB } from "https://deno.land/x/sqlite/mod.ts";
-import { join, resolve, toFileUrl } from "https://deno.land/std@0.165.0/path/mod.ts";
+import { join, resolve, toFileUrl } from "https://deno.land/std@0.170.0/path/mod.ts";
 import { init } from "./setup.ts";
 import initialInit from "./import_initial_data.ts";
 import { config, initConfig } from "./config.ts";
@@ -19,7 +19,7 @@ import { importCards, importStocks } from "./utils/import.ts";
 
 if (import.meta.main) {
   initConfig(join("..", "data", "database.db"));
-  // init(config().DB_PATH);
+  init(config().DB_PATH);
   // await initialInit();
 
   const accounts: Account[] = getAll('accounts');

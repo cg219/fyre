@@ -4,6 +4,7 @@
     "dev:server": "deno run --allow-read --allow-write -A server/main.ts",
     "dev:app": "cargo tauri dev",
     "build:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite build",
+    "build:cli": "deno compile -A -o ../bin server/cli.ts",
     "preview:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite preview",
     "serve:frontend": "cd frontend && deno run --allow-net --allow-read https://deno.land/std@0.157.0/http/file_server.ts dist/"
   },

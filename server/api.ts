@@ -267,18 +267,18 @@ export function addCard(asset: CardSchema) {
   db.close();
 }
 
-export function addAccount(asset: AccountSchema) {
+export function addAccount(asset: AccountSchema): Account[] {
   const db = new DB(config().DB_PATH);
   const sql =
     `INSERT INTO accounts (name, types)
         VALUES (:name, :types)
         RETURNING *;`;
   const { name, types } = asset;
-  const results = db.queryEntries<{ id: number, name: string }>(sql, { name, types });
+  const results = db.queryEntries<{ id: number, name: string, types: string }>(sql, { name, types });
 
   db.close();
 
-  return [results[0], results];
+  return results;
 }
 
 export function addCrypto(asset: CryptoSchema) {
