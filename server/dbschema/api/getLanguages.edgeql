@@ -1,0 +1,4 @@
+select Language {
+    name,
+    id
+}

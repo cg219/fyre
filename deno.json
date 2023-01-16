@@ -12,5 +12,6 @@
     "allowJs": true,
     "checkJs": true,
     "strict": true
-  }
+  },
+  "importMap": "import_map.json"
 }

@@ -1,0 +1,21 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+		}
+	],
+	"settings":
+	{
+		"LSP":
+		{
+			"Deno":
+			{
+				"enabled": true,
+			},
+		},
+	},
+	"debugger_configurations":
+	[
+	],
+}
