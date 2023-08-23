@@ -1,4 +1,0 @@
-select CardSet {
-    name,
-    id
-}

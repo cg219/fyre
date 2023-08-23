@@ -1,12 +1,8 @@
-import { parse } from "https://deno.land/std@0.167.0/encoding/csv.ts";
-import { getIDFromList } from "../api.ts";
-import { createClient } from "https://deno.land/x/edgedb@v1.0.2/mod.ts";
-import { addCard, addStock, getConditions, getEditions, getGradingCompanies, getLanguages, getSets } from "../dbschema/queries.ts";
-import { Account } from "./../dbschema/interfaces.ts";
+import { parse } from "https://deno.land/std@0.199.0/csv/mod.ts";
+import { Account } from "../types.ts";
+import { cards, stocks } from "../models.ts";
 
-const client = createClient();
-
-export async function importCards(url: URL, account?: Account) {
+export async function importCards(url: URL, account: Account) {
     const response = await fetch(url);
     const csv = await response.text();
     const data = parse(csv, {
@@ -17,39 +13,35 @@ export async function importCards(url: URL, account?: Account) {
             'condition', 'error', 'graded', 'gradingCompany', 'grade', 'language'
         ]
     });
-    const languages = await getLanguages(client);
-    const editions = await getEditions(client);
-    const conditions = await getConditions(client);
-    const sets = await getSets(client);
-    const companies = await getGradingCompanies(client);
 
-    const cards = data.map((row) => {
-        return addCard(client, {
+    const promises = data.map((row) => {
+        return cards().save({
+            uuid: crypto.randomUUID(),
             name: row.name as string,
             price: parseFloat(row.price as string),
             cost: parseFloat(row.cost as string),
             amount: parseFloat(row.amount as string),
-            owned: Boolean(row.owned as boolean),
-            liquid: Boolean(row.liquid as boolean),
-            spendable: Boolean(row.spendable as boolean),
-            cardSet: getIDFromList(row.cardSet as string, sets),
-            edition: getIDFromList(row.edition as string, editions),
-            cardNumber: row.cardNumber as string,
+            owned: row.owned == 'TRUE' ? true : false,
+            liquid: row.liquid == 'TRUE' ? true : false,
+            spendable: row.spendable == 'TRUE' ? true : false,
+            cardSet: row.cardSet as string,
+            edition: row.edition as string,
+            number: row.cardNumber as string,
             rarity: row.rarity as string,
-            condition: getIDFromList(row.condition as string, conditions),
-            error: Boolean(row.error as boolean),
-            graded: Boolean(row.graded as boolean),
+            condition: row.condition as string,
+            error: row.error  == 'TRUE' ? true : false,
+            graded: row.graded  == 'TRUE' ? true : false,
             grade: parseFloat(row.grade as string),
-            company: getIDFromList(row.gradingCompany as string, companies),
-            language: getIDFromList(row.language as string, languages),
-            account: account!.id as string
-        })
+            company: row.gradingCompany as string,
+            language: row.language as string,
+            account: account.uuid
+        });
     })
 
-    await Promise.all(cards);
+    await Promise.all(promises);
 }
 
-export async function importStocks(url: URL, account?: Account) {
+export async function importStocks(url: URL, account: Account) {
     const response = await fetch(url);
     const csv = await response.text();
     const data = parse(csv, {
@@ -60,24 +52,25 @@ export async function importStocks(url: URL, account?: Account) {
         ]
     });
 
-    const stocks = data.map((row) => {
-        return addStock(client, {
+    const promises = data.map((row) => {
+        return stocks().save({
+            uuid: crypto.randomUUID(),
             name: row.name as string,
             price: parseFloat(row.price as string),
             cost: parseFloat(row.cost as string),
             amount: parseFloat(row.amount as string),
-            owned: Boolean(row.owned as boolean),
-            liquid: Boolean(row.liquid as boolean),
-            spendable: Boolean(row.spendable as boolean),
+            owned: row.owned == 'TRUE' ? true : false,
+            liquid: row.liquid == 'TRUE' ? true : false,
+            spendable: row.spendable == 'TRUE' ? true : false,
             ticker: row.ticker as string,
             sector: row.sector as string,
-            payout: row.dividendPayout as number || 0,
-            frequency: row.dividendFrequency as number || 0,
-            account: account!.id as string
-        })
+            payout: parseFloat(row.dividendPayout) || 0,
+            frequency: parseFloat(row.dividendFrequency) || 0,
+            account: account.uuid as string
+        });
     })
 
-    await Promise.all(stocks);
+    await Promise.all(promises);
 }
 
 export default {

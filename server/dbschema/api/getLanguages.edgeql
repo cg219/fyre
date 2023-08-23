@@ -1,4 +1,0 @@
-select Language {
-    name,
-    id
-}

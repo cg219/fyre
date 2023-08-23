@@ -1,4 +1,0 @@
-select Edition {
-    name,
-    id
-}

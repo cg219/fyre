@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite",
-    "dev:server": "deno run --allow-read --allow-write -A server/main.ts",
+    "dev:server": "deno run --unstable -A server/main.ts",
     "dev:app": "cargo tauri dev",
     "build:frontend": "cd frontend && deno run -A --node-modules-dir npm:vite build",
     "build:cli": "deno compile -A -o ../bin server/cli.ts",

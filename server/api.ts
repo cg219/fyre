@@ -1,8 +1,7 @@
-import { ListSchemaMap } from "./types.ts";
+/// <reference lib="deno.unstable" />
 
-export function getIDFromList(name: string, list: ListSchemaMap[]): string {
-  const lookup = new Map();
+import { accounts } from "./models.ts";
 
-  list.forEach((o) => lookup.set(o.name, o.id));
-  return lookup.get(name);
+export async function addAccount(name: string, kind: string, types: string[]) {
+  await accounts().save({ uuid: crypto.randomUUID(), name, kind, types })
 }

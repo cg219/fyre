@@ -1,20 +1,24 @@
-import { resolve, toFileUrl, join } from "https://deno.land/std@0.165.0/path/mod.ts";
-import { addAccount } from "./dbschema/queries.ts";
+import { resolve, toFileUrl, join } from "https://deno.land/std@0.199.0/path/mod.ts";
 import { importCards, importStocks } from "./utils/import.ts";
-import { createClient } from "https://deno.land/x/edgedb@v1.0.2/mod.ts";
+import { addAccount } from "./api.ts";
+import { accounts } from "./models.ts";
+import { Account } from "./types.ts";
 
-const pokemonURL = new URL(toFileUrl(resolve(join("..", "imported", "pokemon.csv"))));
-const investingURL = new URL(toFileUrl(resolve(join("..", "imported", "investing.csv"))));
-const rothURL = new URL(toFileUrl(resolve(join("..", "imported", "roth.csv"))));
-const sepURL = new URL(toFileUrl(resolve(join("..", "imported", "sep.csv"))));
+const pokemonURL = new URL(toFileUrl(resolve(join("imported", "pokemon.csv"))));
+const investingURL = new URL(toFileUrl(resolve(join("imported", "investing.csv"))));
+const rothURL = new URL(toFileUrl(resolve(join("imported", "roth.csv"))));
+const sepURL = new URL(toFileUrl(resolve(join("imported", "sep.csv"))));
 
 export default async function init() {
-    const client = createClient();
+    await addAccount('Pokemon', 'cards', ['card']);
+    await addAccount('Fidelity Investing', 'brokerage', ['stock', 'cash']);
+    await addAccount('Roth', 'retirement', ['stock', 'cash']);
+    await addAccount('Business Investing', 'retirement', ['stock', 'cash']);
 
-    const cardAccount = await addAccount(client, { name: 'Pokemon', kind: 'cards', types: ['card'] });
-    const investingAccount = await addAccount(client, { name: 'Fidelity Investing', kind: 'brokerage', types: ['stock', 'cash'] });
-    const rothAccount = await addAccount(client, { name: 'Roth', kind: 'retirement', types: ['stock', 'cash'] });
-    const sepAccount = await addAccount(client, { name: 'Business Investing', kind: 'retirement', types: ['stock', 'cash'] });
+    const cardAccount = await accounts().index('name').get('Pokemon') as Account;
+    const investingAccount = await accounts().index('name').get('Fidelity Investing') as Account;
+    const rothAccount = await accounts().index('name').get('Roth') as Account;
+    const sepAccount = await accounts().index('name').get('Business Investing') as Account;
 
     await importCards(pokemonURL, cardAccount);
     await importStocks(investingURL, investingAccount);

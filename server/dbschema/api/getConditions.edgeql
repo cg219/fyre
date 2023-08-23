@@ -1,4 +1,0 @@
-select Condition {
-    name,
-    id
-}
