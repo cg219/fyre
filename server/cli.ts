@@ -1,8 +1,8 @@
 // import { join, resolve } from "https://deno.land/std@0.199.0/path/mod.ts";
 import { Command, ValidationError, HelpCommand } from "https://deno.land/x/cliffy@v0.25.6/command/mod.ts";
-// import { Table } from "https://deno.land/x/cliffy@v0.25.6/table/table.ts";
+import { Table } from "https://deno.land/x/cliffy@v0.25.6/table/table.ts";
 // import { initConfig } from "./config.ts";
-import { Dictionary } from "./types.ts";
+import { Account, Asset, Dictionary } from "./types.ts";
 import { accounts, cards, closeKv } from "./models.ts";
 import { addAccount } from "./api.ts";
 
@@ -20,13 +20,12 @@ function transformtoTable<T>(data: T[]) {
 // ACCOUNTS
 
 async function listAccounts() {
-    const data = await accounts().index('name').get('Roth')
+    const data = await accounts().index('name').get()
         .catch((e) => {
             console.log(e);
         })
 
-    console.log(data);
-    // return format(data);
+    return format(data as Account[]);
 }
 
 // async function accountAssets(id: string) {
@@ -56,8 +55,7 @@ async function listAccounts() {
 
 async function listAssets() {
     const data = await cards().get();
-    console.log(data);
-    // return format(data as Asset[]);
+    return format(data as Asset[]);
 }
 
 // function accountAssets(id: number) {
@@ -66,34 +64,31 @@ async function listAssets() {
 // }
 
 async function createAccount(name: string, types: string[], kind: string) {
-    if (!name) throw new ValidationError('account creation needs a --name');
     const data = await addAccount(name, kind, types);
-    console.log(data);
-    // return format(data);
+    return format([data]);
 }
 
-// function removeAccount(id: number) {
-//     if (!id) throw new ValidationError('account removal needs a --id');
+async function removeAccount(id: string) {
+    await accounts().index('uuid').remove(id);
+    console.log(`account with id: ${id} removed`);
+}
 
-//     remove(id, 'accounts');
-//     console.log(`account with id: ${id} removed`);
-// }
+async function updateAccount(id: string, name: string) {
+    const account = await accounts().index('uuid').limit(1).get(id) as Account;
+    account.name = name;
 
-// function updateAccount(id: number, name: string) {
-//     if (!id) throw new ValidationError('account removal needs a --id');
-//     if (!name) throw new ValidationError('account removal needs a name; ac');
+    console.log(account);
+    // await accounts().index('uuid').save(account);
+    console.log(`account with id: ${id} updated name to ${name}`);
+}
 
-//     update(id, { name } as AccountUpdate, 'accounts');
-//     console.log(`account with id: ${id} updated name to ${name}`);
-// }
-
-// function format(data: (Asset | Account)[], formatType = 'cli') {
-//     if (formatType == 'json') return data;
-//     if (formatType == 'cli') {
-//         const formatted = transformtoTable(data);
-//         return Table.from(formatted).render();
-//     }
-// }
+function format(data: (Asset | Account)[], formatType = 'cli') {
+    if (formatType == 'json') return data;
+    if (formatType == 'cli') {
+        const formatted = transformtoTable(data);
+        return Table.from(formatted).render();
+    }
+}
 
 const accountsCommand = new Command()
     .option('-i, --id <id:string>', 'account id')
@@ -109,15 +104,17 @@ const accountsCommand = new Command()
         //     if (!id) throw new ValidationError('account assets needs a --id');
         //     return await accountAssets(id);
         // }
-        // if (method.toLowerCase() == 'remove') {
-        //     if (!id) throw new ValidationError('account removal needs a --id');
-        //     return await removeAccount(id);
-        // }
-        // if (method.toLowerCase() == 'update') {
-        //     if (!id) throw new ValidationError('account update needs a --id');
-        //     if (!name) throw new ValidationError('account update needs a --name;');
-        //     return updateAccount(id, name);
-        // }
+        if (method.toLowerCase() == 'remove') {
+            if (!id) throw new ValidationError('account removal needs a --id');
+            return await removeAccount(id);
+        }
+
+        if (method.toLowerCase() == 'update') {
+            if (!id) throw new ValidationError('account update needs a --id');
+            if (!name) throw new ValidationError('account update needs a --name;');
+            return updateAccount(id, name);
+        }
+
         if (method.toLowerCase() == 'create') {
             if (!name) throw new ValidationError('account creation needs a --name');
             return await createAccount(name, type as string[], kind);
